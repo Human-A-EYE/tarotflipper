@@ -1,0 +1,243 @@
+HTML
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarot Card Flipper</title>
+    <style>
+        /* --- Basic Setup & Typography --- */
+        body {
+            font-family: 'Trebuchet MS', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* --- Main Application Container --- */
+        #app-container {
+            width: 90%;
+            max-width: 1000px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* --- History Area for Flipped Cards (Top) --- */
+        #history-area {
+            min-height: 110px; /* Reserve space */
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- Main Playing Area (Deck & Flipped Card) --- */
+        #main-area {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            min-height: 350px;
+        }
+
+        /* --- General Card Styling --- */
+        .card-placeholder {
+            border: 3px solid #c8102e; /* A nice red color */
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #c8102e;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* --- Specific Card Styles --- */
+        #face-down-pile {
+            width: 200px;
+            height: 300px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #face-down-pile:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        #face-down-pile.empty {
+            cursor: not-allowed;
+            background-color: #fafafa;
+            color: #ccc;
+            border-color: #ccc;
+        }
+
+        #face-up-area {
+            width: 200px;
+            height: 300px;
+        }
+        /* Hide the face-up area initially */
+        #face-up-area.hidden {
+            visibility: hidden;
+        }
+
+        /* History cards (small, 1/4 size) */
+        .history-card {
+            width: 50px; /* 1/4 of 200px */
+            height: 75px; /* 1/4 of 300px */
+            font-size: 0.7rem;
+        }
+        
+        /* --- Controls (Reset Button) --- */
+        #controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="history-area"></div>
+
+    <div id="main-area">
+        <div id="face-down-pile" class="card-placeholder">Face Down Cards</div>
+        <div id="face-up-area" class="card-placeholder hidden"></div>
+    </div>
+
+    <div id="controls">
+        <button id="reset-button">Reset</button>
+    </div>
+</div>
+
+<script>
+    // --- Constants and State Variables ---
+    const TOTAL_CARDS = 78;
+    const faceDownPile = document.getElementById('face-down-pile');
+    const faceUpArea = document.getElementById('face-up-area');
+    const historyArea = document.getElementById('history-area');
+    const resetButton = document.getElementById('reset-button');
+
+    let deck = [];
+    let currentFlippedCard = null;
+
+    // --- Core Functions ---
+
+    /**
+     * Creates a new, shuffled deck of cards (numbers 1-78).
+     */
+    function initializeDeck() {
+        deck = [];
+        for (let i = 1; i <= TOTAL_CARDS; i++) {
+            deck.push(i);
+        }
+        // Optional: Shuffle the deck initially for more randomness, though we pull random cards anyway.
+        // deck.sort(() => Math.random() - 0.5); 
+    }
+
+    /**
+     * Handles the main logic when the deck is clicked.
+     */
+    function flipCard() {
+        // Stop if the deck is empty
+        if (deck.length === 0) {
+            faceDownPile.textContent = 'Deck Empty';
+            faceDownPile.classList.add('empty');
+            return;
+        }
+
+        // If there's already a card face up, move it to the history
+        if (currentFlippedCard !== null) {
+            const historyCard = document.createElement('div');
+            historyCard.classList.add('card-placeholder', 'history-card');
+            
+            // To display an actual image later, you would change this part
+            // For example: historyCard.innerHTML = `<img src="images/card_${currentFlippedCard}.jpg">`;
+            historyCard.textContent = `Card ${currentFlippedCard}`;
+            
+            historyArea.appendChild(historyCard);
+        }
+
+        // Draw a random card from the deck
+        const randomIndex = Math.floor(Math.random() * deck.length);
+        const newCardId = deck.splice(randomIndex, 1)[0]; // Pull the card out of the deck array
+
+        // Update the main face-up card display
+        currentFlippedCard = newCardId;
+        faceUpArea.classList.remove('hidden'); // Make the area visible
+        
+        // This is where you would set the image for the main flipped card
+        // For example: faceUpArea.innerHTML = `<img src="images/card_${currentFlippedCard}.jpg" style="width:100%; height:100%;">`;
+        faceUpArea.textContent = `Face Up Card ${currentFlippedCard}`;
+        
+        // Update the count on the face-down pile
+        faceDownPile.textContent = `Face Down Cards (${deck.length})`;
+
+        // Check again if the deck is now empty
+        if (deck.length === 0) {
+            faceDownPile.textContent = 'Deck Empty';
+            faceDownPile.classList.add('empty');
+        }
+    }
+
+    /**
+     * Resets the entire application to its initial state.
+     */
+    function resetApp() {
+        // 1. Recreate the deck
+        initializeDeck();
+
+        // 2. Clear the UI
+        historyArea.innerHTML = '';
+        faceUpArea.innerHTML = '';
+        faceUpArea.classList.add('hidden');
+        
+        // 3. Reset state variables
+        currentFlippedCard = null;
+
+        // 4. Reset the face-down pile's appearance
+        faceDownPile.classList.remove('empty');
+        faceDownPile.textContent = `Face Down Cards (${deck.length})`;
+    }
+
+    // --- Event Listeners ---
+    faceDownPile.addEventListener('click', flipCard);
+    resetButton.addEventListener('click', resetApp);
+
+    // --- Initial Start ---
+    // Start the application for the first time
+    resetApp();
+
+</script>
+
+</body>
+</html>
+
